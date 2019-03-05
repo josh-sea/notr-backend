@@ -8,7 +8,7 @@ Rails.application.routes.draw do
       post '/login', to: 'users#login'
       post '/register', to: 'users#register'
       post '/listener/', to: 'users#listener'
-      # get '/test/:search', to: 'notes#test'
+      get '/curr_user/', to: 'users#curr_user'
     end
   end
   mount ActionCable.server => '/cable'

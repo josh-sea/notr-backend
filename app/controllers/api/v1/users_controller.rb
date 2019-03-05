@@ -1,5 +1,5 @@
 class Api::V1::UsersController < ApplicationController
-# before_action: :only, [:create, :show, :destroy]
+before_action :find_user, only: [:create, :show, :destroy]
 
 
   def index
@@ -7,43 +7,55 @@ class Api::V1::UsersController < ApplicationController
     render json: @users, status: :ok
   end
 
-  # def show
-  #   byebug
-  #   @user = User.find(params[:id])
-  #   @class_name = @user.classrooms.uniq
-  #   render json: {className: @class_name}
-  # end
-
-  def listener
-    @user = User.find(params[:user_id])
-    classrooms = @user.classrooms
-    ActionCable.server.broadcast 'user_listener', classrooms
-    render json: @user, status: :ok
+  def show
+    @notes = @user.notes
+    @classrooms = @user.classrooms.uniq
+    render json: {success: true, user: @user, notes: @notes, classrooms: @classrooms}, status: :ok
   end
 
+  # def listener
+  #   @user = User.find(params[:user_id])
+  #   classrooms = @user.classrooms
+  #   ActionCable.server.broadcast 'user_listener', classrooms
+  #   render json: @user, status: :ok
+  # end
 
   def login
     @user = User.find_by(username: params[:username])
     @notes = @user.notes
     @classrooms = @user.classrooms.uniq
-    if @user
-      render json: {success: true, user: @user, notes: @notes, classrooms: @classrooms}, status: :ok
+    if @user && @user.authenticate(params[:password])
+      token = encode_token(@user.id)
+      render json: {success: true, user: UserSerializer.new(@user), notes: @notes, classrooms: @classrooms, token: token}, status: :ok
     else
       render json: {success: false, user: @user, notes: @notes, classrooms: @classrooms}, status: :unauthorized
     end
   end
 
   def register
-    @user = User.create(user_params)
+    @user = User.create(username: params[:username], password: params[:password])
     @notes = @user.notes
     @classrooms = @user.classrooms.uniq
+    if @user.valid?
+      token = encode_token(@user.id)
+      render json: {success: true, user: UserSerializer.new(@user), notes: @notes, classrooms: @classrooms, token: token}, status: :ok
+    else
+      render json: {success: false, errors: @user.errors.full_messages}, status: :unauthorized
+    end
+  end
+
+  def curr_user
+    # token = token()
+    user_id = decode_token(token())
+    @user = User.find_by(id: user_id)
     if @user
-      render json: {success: true, user: @user, notes: @notes, classrooms: @classrooms}, status: :ok
+      @notes = @user.notes
+      @classrooms = @user.classrooms.uniq
+      render json: {success: true, user: @user, notes: @notes, classrooms: @classrooms, token: token}, status: :ok
     else
       render json: {success: false, user: @user, notes: @notes, classrooms: @classrooms}, status: :unauthorized
     end
   end
-
 
   def create
     @user = User.create(user_params)
@@ -52,10 +64,6 @@ class Api::V1::UsersController < ApplicationController
     else
       render json: {success: false, user: @user, errors: @user.errors.messages}, status: :bad_request
     end
-  end
-
-  def show
-    render json: @user, status: :ok
   end
 
 
@@ -76,7 +84,7 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(:username, :user_id)
+    params.require(:user).permit(:username, :password, :user_id)
   end
 
 #################################################################################################
