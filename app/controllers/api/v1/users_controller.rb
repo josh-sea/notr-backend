@@ -4,13 +4,16 @@ before_action :find_user, only: [:create, :show, :destroy]
 
   def index
     @users = User.all
-    render json: @users, status: :ok
+    @classrooms = Classroom.all
+    @notes = Note.all
+    render json: {users: @users, classrooms: @classrooms, notes: @notes}, status: :ok
   end
 
   def show
     @notes = @user.notes
     @classrooms = @user.classrooms.uniq
-    render json: {success: true, user: @user, notes: @notes, classrooms: @classrooms}, status: :ok
+    @users = @user.classrooms.map{|classroom|classroom.users}.flatten.uniq
+    render json: {success: true, user: UserSerializer.new(@user), classrooms: @classrooms, notes: @notes, users: @users}, status: :ok
   end
 
   # def listener
@@ -24,11 +27,12 @@ before_action :find_user, only: [:create, :show, :destroy]
     @user = User.find_by(username: params[:username])
     @notes = @user.notes
     @classrooms = @user.classrooms.uniq
+    @users = @user.classrooms.map{|classroom|classroom.users}.flatten.uniq
     if @user && @user.authenticate(params[:password])
       token = encode_token(@user.id)
-      render json: {success: true, user: UserSerializer.new(@user), notes: @notes, classrooms: @classrooms, token: token}, status: :ok
+      render json: {success: true, user: UserSerializer.new(@user), notes: @notes, classrooms: @classrooms, users: @users, token: token}, status: :ok
     else
-      render json: {success: false, user: @user, notes: @notes, classrooms: @classrooms}, status: :unauthorized
+      render json: {success: false, user: UserSerializer.new(@user), notes: @notes}, status: :unauthorized
     end
   end
 
@@ -36,9 +40,10 @@ before_action :find_user, only: [:create, :show, :destroy]
     @user = User.create(username: params[:username], password: params[:password])
     @notes = @user.notes
     @classrooms = @user.classrooms.uniq
+    @users = @user.classrooms.map{|classroom|classroom.users}.flatten.uniq
     if @user.valid?
       token = encode_token(@user.id)
-      render json: {success: true, user: UserSerializer.new(@user), notes: @notes, classrooms: @classrooms, token: token}, status: :ok
+      render json: {success: true, user: UserSerializer.new(@user), notes: @notes, classrooms: @classrooms, users: @users, token: token}, status: :ok
     else
       render json: {success: false, errors: @user.errors.full_messages}, status: :unauthorized
     end
@@ -51,20 +56,21 @@ before_action :find_user, only: [:create, :show, :destroy]
     if @user
       @notes = @user.notes
       @classrooms = @user.classrooms.uniq
-      render json: {success: true, user: @user, notes: @notes, classrooms: @classrooms, token: token}, status: :ok
+      @users = @user.classrooms.map{|classroom|classroom.users}.flatten.uniq
+        render json: {success: true, user: UserSerializer.new(@user), notes: @notes, classrooms: @classrooms, users: @users, token: token}, status: :ok
     else
-      render json: {success: false, user: @user, notes: @notes, classrooms: @classrooms}, status: :unauthorized
+      render json: {success: false, user: UserSerializer.new(@user), notes: @notes, classrooms: @classrooms}, status: :unauthorized
     end
   end
 
-  def create
-    @user = User.create(user_params)
-    if @user.valid?
-      render json: {success: true, user: @user, notes: @user.notes}, status: :ok
-    else
-      render json: {success: false, user: @user, errors: @user.errors.messages}, status: :bad_request
-    end
-  end
+  # def create
+  #   @user = User.create(user_params)
+  #   if @user.valid?
+  #     render json: {success: true, user: UserSerializer.new(@user), notes: @user.notes}, status: :ok
+  #   else
+  #     render json: {success: false, user: UserSerializer.new(@user), errors: @user.errors.messages}, status: :bad_request
+  #   end
+  # end
 
 
 
