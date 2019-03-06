@@ -4,7 +4,6 @@ development:
   :port: 9566
   :timeout: 1
   :inline: true
-  :password: 4e828d6feb1220602bc05626f4ba35df
 test:
   adapter: *development
 production:
