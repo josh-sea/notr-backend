@@ -52,7 +52,8 @@ Rails.application.configure do
   # routes, locales, etc. This feature depends on the listen gem.
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
    # config.action_cable.allowed_request_origins = [%r{https?://\S+}]
+   ENV["REDISTOGO_URL"] = 'redis://username:password@my.host:6389'
    config.action_cable.allowed_request_origins = ['http://notr-backend.herokuapp.com', 'https://notr-backend.herokuapp.com']
-   config.web_socket_server_url = "wss://notr-backend.herokuapp.com'/cable" 
+   config.web_socket_server_url = "wss://notr-backend.herokuapp.com'/cable"
 
 end

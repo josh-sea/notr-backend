@@ -1,10 +1,16 @@
 development:
-  adapter: async
-
+  :url: redis://redistogo:4e828d6feb1220602bc05626f4ba35df@barb.redistogo.com:9566/
+  :host: barb.redistogo.com
+  :port: 9566
+  :timeout: 1
+  :inline: true
+  :password: 4e828d6feb1220602bc05626f4ba35df
 test:
-  adapter: async
-
+  adapter: *development
 production:
-  adapter: redis
-  url: <%= ENV.fetch("REDIS_URL") { "redis://localhost:6379/1" } %>
-  channel_prefix: Notr_production
+  :url: redis://redistogo:4e828d6feb1220602bc05626f4ba35df@barb.redistogo.com:9566/
+  :host: barb.redistogo.com
+  :port: 9566
+  :timeout: 1
+  :inline: true
+  :password: 4e828d6feb1220602bc05626f4ba35df
