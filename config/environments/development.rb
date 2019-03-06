@@ -51,5 +51,8 @@ Rails.application.configure do
   # Use an evented file watcher to asynchronously detect changes in source code,
   # routes, locales, etc. This feature depends on the listen gem.
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
-   config.action_cable.allowed_request_origins = [%r{https?://\S+}]
+   # config.action_cable.allowed_request_origins = [%r{https?://\S+}]
+   config.action_cable.allowed_request_origins = ['http://notr-backend.herokuapp.com', 'https://notr-backend.herokuapp.com']
+   config.web_socket_server_url = "wss://notr-backend.herokuapp.com'/cable" 
+
 end
