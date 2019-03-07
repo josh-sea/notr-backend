@@ -22,7 +22,8 @@ class Api::V1::NotesController < ApplicationController
   def update
     @note = Note.find(params[:id])
     @note.update(note_params)
-    ActionCable.server.broadcast('new_note', {note: @note, request: 'edit'})
+    ActionCable.broadcast_to(@note.classroom, {note: @note, request: 'edit'} )
+    # ActionCable.server.broadcast('new_note', {note: @note, request: 'edit'})
     # render json: @note, status: :ok
   end
 
