@@ -1,7 +1,9 @@
 class UserListenerChannel < ApplicationCable::Channel
 
   def subscribed
-    stream_from 'user_listener'
+    user = User.find(params[:user_id])
+    byebug
+    stream_for user
   end
 
   def unsubscribed

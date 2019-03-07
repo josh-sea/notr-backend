@@ -4,6 +4,7 @@ class NewNoteChannel < ApplicationCable::Channel
   def subscribed
     # classroom = Classroom.find_by(id: params[:classroom_id])
     # stream_for classroom
+    # note = Note.find(params[:id])
     stream_from 'new_note'
   end
 
